@@ -93,6 +93,12 @@ LOGIN_TEMPLATE = """
             margin-bottom: 20px;
             border: 1px solid #f5c6cb;
         }
+        .error small {
+            display: block;
+            margin-top: 8px;
+            opacity: 0.8;
+            font-style: italic;
+        }
         .success {
             background-color: #d4edda;
             color: #155724;
@@ -135,7 +141,10 @@ LOGIN_TEMPLATE = """
         
         {% if error %}
         <div class="error">
-            <strong>Error:</strong> {{ error }}
+            <strong>Error:</strong> {{ error.message if error.message else error }}
+            {% if error.suggestion %}
+            <br><small><em>{{ error.suggestion }}</em></small>
+            {% endif %}
         </div>
         {% endif %}
         
@@ -302,11 +311,19 @@ def signin():
         session['user'] = result['user']
         return redirect(url_for('dashboard'))
     else:
-        # Show error message
-        error_message = result['error']['message']
+        # Show enhanced error message with suggestions
+        error_info = result['error']
+        error_display = {
+            'message': error_info.get('message', 'An error occurred'),
+        }
+        
+        # Add suggestion if available
+        if 'details' in error_info and error_info['details'].get('suggestion'):
+            error_display['suggestion'] = error_info['details']['suggestion']
+        
         return render_template_string(
             LOGIN_TEMPLATE,
-            error=error_message,
+            error=error_display,
             email=email
         )
 

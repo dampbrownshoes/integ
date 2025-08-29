@@ -289,68 +289,105 @@ class SignInManager:
         Returns dict with success status, token (if successful), or error details.
         """
         try:
-            # Input validation
+            # Input validation with user-friendly messages
             if not email:
                 raise SignInError(
-                    "Email address is required",
+                    "Please enter your email address to continue.",
                     "MISSING_EMAIL",
-                    {"field": "email"}
+                    {
+                        "field": "email",
+                        "suggestion": "Enter the email address you used to create your account"
+                    }
                 )
             
             if not password:
                 raise SignInError(
-                    "Password is required",
+                    "Please enter your password to sign in.",
                     "MISSING_PASSWORD",
-                    {"field": "password"}
+                    {
+                        "field": "password",
+                        "suggestion": "Enter the password you created for your account"
+                    }
                 )
             
             # Normalize email
             email = email.strip().lower()
             
-            # Validate email format
+            # Validate email format with helpful guidance
             if not self.validate_email(email):
+                # Provide specific guidance based on common email format issues
+                suggestion = "Please check your email format"
+                if '@' not in email:
+                    suggestion = "Email addresses must contain an '@' symbol (e.g., you@example.com)"
+                elif '.' not in email.split('@')[-1] if '@' in email else False:
+                    suggestion = "Email addresses must have a domain with a dot (e.g., you@example.com)"
+                elif email.startswith('@') or email.endswith('@'):
+                    suggestion = "Please enter a complete email address (e.g., you@example.com)"
+                
                 raise SignInError(
-                    "Please enter a valid email address",
+                    f"The email address format appears to be invalid. {suggestion}",
                     "INVALID_EMAIL_FORMAT",
-                    {"field": "email", "email": email}
+                    {
+                        "field": "email", 
+                        "email": email,
+                        "suggestion": suggestion
+                    }
                 )
             
-            # Check rate limiting
+            # Check rate limiting with helpful recovery guidance
             is_rate_limited, seconds_until_reset = self.rate_limiter.is_rate_limited(email)
             if is_rate_limited:
+                minutes_remaining = (seconds_until_reset // 60) + 1
+                reset_time = "a few moments" if minutes_remaining <= 1 else f"{minutes_remaining} minutes"
+                
                 raise SignInError(
-                    f"Too many failed attempts. Please try again in {seconds_until_reset // 60 + 1} minutes.",
+                    f"We've detected several unsuccessful sign-in attempts. For security, please wait {reset_time} before trying again.",
                     "RATE_LIMITED",
-                    {"seconds_until_reset": seconds_until_reset, "email": email}
+                    {
+                        "seconds_until_reset": seconds_until_reset,
+                        "minutes_until_reset": minutes_remaining, 
+                        "email": email,
+                        "suggestion": "Double-check your email and password, or try resetting your password if you're having trouble remembering it"
+                    }
                 )
             
-            # Get user
+            # Get user with security-conscious error handling
             user = self.user_store.get_user(email)
             if not user:
                 # Record failed attempt
                 self.rate_limiter.record_attempt(email, False)
                 raise SignInError(
-                    "Invalid email or password",
+                    "We couldn't find an account with that email and password combination. Please check your credentials and try again.",
                     "INVALID_CREDENTIALS",
-                    {"field": "credentials"}
+                    {
+                        "field": "credentials",
+                        "suggestion": "Make sure you're using the correct email address and password, or try resetting your password if needed"
+                    }
                 )
             
-            # Check if user is active
+            # Check if user account is active
             if not user.get('active', True):
                 raise SignInError(
-                    "Your account has been deactivated. Please contact support.",
+                    "Your account is currently inactive. This might be temporary - please contact our support team for assistance.",
                     "ACCOUNT_DEACTIVATED",
-                    {"email": email}
+                    {
+                        "email": email,
+                        "support_action": "contact_support",
+                        "suggestion": "Contact our support team who can help reactivate your account"
+                    }
                 )
             
-            # Verify password
+            # Verify password with helpful error message
             if not self.user_store.verify_password(email, password):
                 # Record failed attempt
                 self.rate_limiter.record_attempt(email, False)
                 raise SignInError(
-                    "Invalid email or password",
+                    "The password you entered doesn't match our records. Please double-check your password and try again.",
                     "INVALID_CREDENTIALS",
-                    {"field": "credentials"}
+                    {
+                        "field": "credentials",
+                        "suggestion": "Make sure Caps Lock is off and try typing your password again, or use the 'Forgot Password' option if you need to reset it"
+                    }
                 )
             
             # Check trial access after password verification
@@ -361,35 +398,38 @@ class SignInManager:
                 
                 if reason == 'no_trial_signup':
                     raise SignInError(
-                        "You need to sign up for a free trial to access this service. Please visit our website to start your free trial.",
+                        "To access our service, you'll need to sign up for a free trial first. Don't worry - it only takes a minute and you can start exploring right away!",
                         "NO_TRIAL_SIGNUP",
                         {
                             "email": email,
                             "trial_status": trial_status,
-                            "action_required": "signup_for_trial"
+                            "action_required": "signup_for_trial",
+                            "next_steps": "Visit our website to start your free trial, or contact support if you need assistance"
                         }
                     )
                 elif reason == 'trial_expired':
                     expired_at = trial_access.get('expired_at')
                     raise SignInError(
-                        "Your free trial has expired. Please upgrade to continue using our service.",
+                        "Your free trial has ended, but you can continue enjoying our service by upgrading your account. You'll get access to all features without interruption.",
                         "TRIAL_EXPIRED", 
                         {
                             "email": email,
                             "trial_status": trial_status,
                             "expired_at": expired_at,
-                            "action_required": "upgrade_account"
+                            "action_required": "upgrade_account",
+                            "next_steps": "Choose a plan that works for you, or contact our team to discuss options"
                         }
                     )
                 else:
-                    # Generic trial access error
+                    # Generic trial access error with helpful guidance
                     raise SignInError(
-                        "Access denied due to trial restrictions. Please contact support for assistance.",
+                        "There's an issue with your account access. Our support team can help resolve this quickly - please reach out to them.",
                         "TRIAL_ACCESS_DENIED",
                         {
                             "email": email,
                             "trial_status": trial_status,
-                            "reason": reason
+                            "reason": reason,
+                            "next_steps": "Contact our support team with your email address for immediate assistance"
                         }
                     )
             
@@ -422,13 +462,31 @@ class SignInManager:
             }
         
         except Exception as e:
-            # Log unexpected errors (in production, use proper logging)
+            # Enhanced fallback error handling with recovery guidance
+            import traceback
+            error_details = {
+                "error_type": type(e).__name__,
+                "suggestion": "Please try again in a moment. If the problem continues, our support team can help.",
+                "recovery_steps": [
+                    "Wait a moment and try signing in again",
+                    "Check your internet connection",
+                    "Clear your browser cache if using a web interface", 
+                    "Contact support if the issue persists"
+                ]
+            }
+            
+            # In production, log the full error details for debugging
+            # but don't expose them to the user for security
+            if hasattr(e, 'args') and e.args:
+                # Safe logging placeholder - in production, use proper logging
+                pass
+                
             return {
                 'success': False,
                 'error': {
-                    'message': 'An unexpected error occurred. Please try again.',
+                    'message': 'Something unexpected happened while trying to sign you in. Please try again, and contact support if you continue to have trouble.',
                     'code': 'INTERNAL_ERROR',
-                    'details': {},
+                    'details': error_details,
                     'timestamp': datetime.now(timezone.utc).isoformat()
                 }
             }
@@ -438,14 +496,16 @@ class SignInManager:
         if not token:
             return {
                 'valid': False,
-                'error': 'Token is required'
+                'error': 'Please sign in to continue - no session token provided',
+                'suggestion': 'Sign in again to access your account'
             }
         
         session = self.session_manager.validate_session(token)
         if not session:
             return {
                 'valid': False,
-                'error': 'Invalid or expired token'
+                'error': 'Your session has expired or is no longer valid. Please sign in again.',
+                'suggestion': 'Sign in with your email and password to continue'
             }
         
         return {
@@ -462,13 +522,14 @@ class SignInManager:
         if not token:
             return {
                 'success': False,
-                'error': 'Token is required'
+                'error': 'Unable to sign out - no session token provided',
+                'suggestion': 'You may already be signed out'
             }
         
         self.session_manager.invalidate_session(token)
         return {
             'success': True,
-            'message': 'Sign-out successful'
+            'message': 'You have been successfully signed out. Thanks for using our service!'
         }
     
     def extend_session(self, token: str) -> Dict[str, Any]:
@@ -476,18 +537,20 @@ class SignInManager:
         if not token:
             return {
                 'success': False,
-                'error': 'Token is required'
+                'error': 'Unable to extend session - no token provided',
+                'suggestion': 'Please sign in again to continue'
             }
         
         if self.session_manager.extend_session(token):
             return {
                 'success': True,
-                'message': 'Session extended successfully'
+                'message': 'Your session has been extended successfully - you can continue using the service'
             }
         else:
             return {
                 'success': False,
-                'error': 'Invalid or expired token'
+                'error': 'Unable to extend session - your session may have expired',
+                'suggestion': 'Please sign in again to continue using the service'
             }
 
 

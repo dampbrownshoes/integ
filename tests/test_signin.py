@@ -408,7 +408,7 @@ class TestTrialAccess(unittest.TestCase):
         result = self.signin_manager.sign_in("expired@example.com", "password123")
         self.assertFalse(result['success'])
         self.assertEqual(result['error']['code'], "TRIAL_EXPIRED")
-        self.assertIn("trial has expired", result['error']['message'])
+        self.assertIn("free trial has ended", result['error']['message'])
         self.assertEqual(result['error']['details']['action_required'], "upgrade_account")
     
     def test_admin_user_with_upgraded_access(self):
