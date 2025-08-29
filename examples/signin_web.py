@@ -127,8 +127,10 @@ LOGIN_TEMPLATE = """
         
         <div class="demo-credentials">
             <h3>Demo Credentials</h3>
-            <p><strong>User:</strong> <span class="code">user@example.com</span> / <span class="code">password123</span></p>
-            <p><strong>Admin:</strong> <span class="code">admin@example.com</span> / <span class="code">admin123</span></p>
+            <p><strong>User:</strong> <span class="code">user@example.com</span> / <span class="code">password123</span> <em>(Active Trial)</em></p>
+            <p><strong>Admin:</strong> <span class="code">admin@example.com</span> / <span class="code">admin123</span> <em>(Upgraded)</em></p>
+            <p><strong>No Trial:</strong> <span class="code">notrial@example.com</span> / <span class="code">password123</span> <em>(No Trial Signup)</em></p>
+            <p><strong>Expired:</strong> <span class="code">expired@example.com</span> / <span class="code">password123</span> <em>(Expired Trial)</em></p>
         </div>
         
         {% if error %}

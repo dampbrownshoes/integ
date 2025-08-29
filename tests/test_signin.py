@@ -383,6 +383,80 @@ class TestPasswordValidation(unittest.TestCase):
         self.assertIn("Password must contain at least one digit", errors)
 
 
+class TestTrialAccess(unittest.TestCase):
+    """Test free trial access functionality."""
+    
+    def setUp(self):
+        self.signin_manager = SignInManager("test-secret")
+    
+    def test_user_with_active_trial(self):
+        """Test sign-in for user with active trial."""
+        result = self.signin_manager.sign_in("user@example.com", "password123")
+        self.assertTrue(result['success'])
+        self.assertIn('token', result)
+    
+    def test_user_with_no_trial_signup(self):
+        """Test sign-in for user who hasn't signed up for free trial."""
+        result = self.signin_manager.sign_in("notrial@example.com", "password123")
+        self.assertFalse(result['success'])
+        self.assertEqual(result['error']['code'], "NO_TRIAL_SIGNUP")
+        self.assertIn("sign up for a free trial", result['error']['message'])
+        self.assertEqual(result['error']['details']['action_required'], "signup_for_trial")
+    
+    def test_user_with_expired_trial(self):
+        """Test sign-in for user with expired trial."""
+        result = self.signin_manager.sign_in("expired@example.com", "password123")
+        self.assertFalse(result['success'])
+        self.assertEqual(result['error']['code'], "TRIAL_EXPIRED")
+        self.assertIn("trial has expired", result['error']['message'])
+        self.assertEqual(result['error']['details']['action_required'], "upgrade_account")
+    
+    def test_admin_user_with_upgraded_access(self):
+        """Test sign-in for admin user with upgraded access."""
+        result = self.signin_manager.sign_in("admin@example.com", "admin123")
+        self.assertTrue(result['success'])
+        self.assertIn('token', result)
+
+
+class TestTrialStatusChecking(unittest.TestCase):
+    """Test trial status checking functionality."""
+    
+    def setUp(self):
+        self.user_store = UserStore()
+    
+    def test_check_active_trial(self):
+        """Test checking active trial status."""
+        trial_access = self.user_store.check_trial_access("user@example.com")
+        self.assertTrue(trial_access['has_access'])
+        self.assertEqual(trial_access['trial_status'], 'active')
+    
+    def test_check_no_trial(self):
+        """Test checking user with no trial."""
+        trial_access = self.user_store.check_trial_access("notrial@example.com")
+        self.assertFalse(trial_access['has_access'])
+        self.assertEqual(trial_access['reason'], 'no_trial_signup')
+        self.assertEqual(trial_access['trial_status'], 'none')
+    
+    def test_check_expired_trial(self):
+        """Test checking expired trial status."""
+        trial_access = self.user_store.check_trial_access("expired@example.com")
+        self.assertFalse(trial_access['has_access'])
+        self.assertEqual(trial_access['reason'], 'trial_expired')
+        self.assertEqual(trial_access['trial_status'], 'expired')
+    
+    def test_check_upgraded_user(self):
+        """Test checking upgraded user status."""
+        trial_access = self.user_store.check_trial_access("admin@example.com")
+        self.assertTrue(trial_access['has_access'])
+        self.assertEqual(trial_access['trial_status'], 'upgraded')
+    
+    def test_check_nonexistent_user(self):
+        """Test checking trial status for non-existent user."""
+        trial_access = self.user_store.check_trial_access("nonexistent@example.com")
+        self.assertFalse(trial_access['has_access'])
+        self.assertEqual(trial_access['reason'], 'user_not_found')
+
+
 def run_integration_tests():
     """Run integration tests that demonstrate the full sign-in flow."""
     print("\n=== Integration Tests ===")

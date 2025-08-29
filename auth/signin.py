@@ -126,21 +126,43 @@ class UserStore:
     """Simple user store for demo purposes. In production, use a proper database."""
     
     def __init__(self):
-        # Demo users with hashed passwords
+        # Demo users with hashed passwords and trial status
         self.users = {
             'user@example.com': {
                 'id': 'user1',
                 'email': 'user@example.com',
                 'password_hash': self._hash_password('password123'),
                 'name': 'Demo User',
-                'active': True
+                'active': True,
+                'trial_status': 'active',  # 'none', 'active', 'expired', 'upgraded'
+                'trial_expires_at': datetime.now(timezone.utc) + timedelta(days=30)
             },
             'admin@example.com': {
                 'id': 'admin1',
                 'email': 'admin@example.com',
                 'password_hash': self._hash_password('admin123'),
                 'name': 'Admin User',
-                'active': True
+                'active': True,
+                'trial_status': 'upgraded',  # Admin has full access
+                'trial_expires_at': None
+            },
+            'notrial@example.com': {
+                'id': 'user2',
+                'email': 'notrial@example.com',
+                'password_hash': self._hash_password('password123'),
+                'name': 'No Trial User',
+                'active': True,
+                'trial_status': 'none',  # User hasn't signed up for trial
+                'trial_expires_at': None
+            },
+            'expired@example.com': {
+                'id': 'user3',
+                'email': 'expired@example.com',
+                'password_hash': self._hash_password('password123'),
+                'name': 'Expired Trial User',
+                'active': True,
+                'trial_status': 'expired',  # Trial has expired
+                'trial_expires_at': datetime.now(timezone.utc) - timedelta(days=5)
             }
         }
     
@@ -161,6 +183,56 @@ class UserStore:
         
         password_hash = self._hash_password(password)
         return hmac.compare_digest(user['password_hash'], password_hash)
+    
+    def check_trial_access(self, email: str) -> Dict[str, Any]:
+        """Check trial access status for user."""
+        user = self.get_user(email)
+        if not user:
+            return {'has_access': False, 'reason': 'user_not_found'}
+        
+        trial_status = user.get('trial_status', 'none')
+        trial_expires_at = user.get('trial_expires_at')
+        
+        # Users with 'upgraded' status have full access
+        if trial_status == 'upgraded':
+            return {'has_access': True, 'trial_status': trial_status}
+        
+        # Users with 'active' trial need to check expiration
+        if trial_status == 'active':
+            if trial_expires_at and datetime.now(timezone.utc) > trial_expires_at:
+                # Trial has expired, update status
+                user['trial_status'] = 'expired'
+                return {
+                    'has_access': False, 
+                    'reason': 'trial_expired',
+                    'trial_status': 'expired',
+                    'expired_at': trial_expires_at.isoformat()
+                }
+            return {'has_access': True, 'trial_status': trial_status}
+        
+        # Users with 'expired' trial
+        if trial_status == 'expired':
+            return {
+                'has_access': False,
+                'reason': 'trial_expired',
+                'trial_status': 'expired',
+                'expired_at': trial_expires_at.isoformat() if trial_expires_at else None
+            }
+        
+        # Users with no trial ('none' status)
+        if trial_status == 'none':
+            return {
+                'has_access': False,
+                'reason': 'no_trial_signup',
+                'trial_status': 'none'
+            }
+        
+        # Default case - no access
+        return {
+            'has_access': False,
+            'reason': 'unknown_trial_status',
+            'trial_status': trial_status
+        }
 
 
 class SignInManager:
@@ -280,6 +352,46 @@ class SignInManager:
                     "INVALID_CREDENTIALS",
                     {"field": "credentials"}
                 )
+            
+            # Check trial access after password verification
+            trial_access = self.user_store.check_trial_access(email)
+            if not trial_access['has_access']:
+                reason = trial_access.get('reason')
+                trial_status = trial_access.get('trial_status')
+                
+                if reason == 'no_trial_signup':
+                    raise SignInError(
+                        "You need to sign up for a free trial to access this service. Please visit our website to start your free trial.",
+                        "NO_TRIAL_SIGNUP",
+                        {
+                            "email": email,
+                            "trial_status": trial_status,
+                            "action_required": "signup_for_trial"
+                        }
+                    )
+                elif reason == 'trial_expired':
+                    expired_at = trial_access.get('expired_at')
+                    raise SignInError(
+                        "Your free trial has expired. Please upgrade to continue using our service.",
+                        "TRIAL_EXPIRED", 
+                        {
+                            "email": email,
+                            "trial_status": trial_status,
+                            "expired_at": expired_at,
+                            "action_required": "upgrade_account"
+                        }
+                    )
+                else:
+                    # Generic trial access error
+                    raise SignInError(
+                        "Access denied due to trial restrictions. Please contact support for assistance.",
+                        "TRIAL_ACCESS_DENIED",
+                        {
+                            "email": email,
+                            "trial_status": trial_status,
+                            "reason": reason
+                        }
+                    )
             
             # Success - create session
             session_token = self.session_manager.create_session(user['id'], user['email'])
