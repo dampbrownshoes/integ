@@ -1,13 +1,15 @@
 {
   "name": "integ",
   "version": "1.0.0",
-  "description": "Integration service with authentication handling",
+  "description": "Integration service with robust authentication and comprehensive status monitoring",
   "main": "auth-handler.js",
   "scripts": {
     "test": "node test/auth-handler.test.js",
-    "start": "node auth-handler.js"
+    "start": "node auth-handler.js",
+    "demo": "node example.js",
+    "status": "node status-demo.js"
   },
-  "keywords": ["auth", "authentication", "integration"],
+  "keywords": ["auth", "authentication", "integration", "jwt", "legacy", "tokens", "status", "monitoring", "rate-limiting"],
   "author": "",
   "license": "ISC"
 }
