@@ -5,7 +5,7 @@
 
 class AuthHandler {
   constructor() {
-    this.legacyTokenPattern = /^legacy_[a-zA-Z0-9]{32}$/;
+    this.legacyTokenPattern = /^legacy_[a-zA-Z0-9]{32,}$/;
     this.newTokenPattern = /^Bearer [a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
   }
 
