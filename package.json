@@ -1,0 +1,13 @@
+{
+  "name": "integ",
+  "version": "1.0.0",
+  "description": "Integration service with authentication handling",
+  "main": "auth-handler.js",
+  "scripts": {
+    "test": "node test/auth-handler.test.js",
+    "start": "node auth-handler.js"
+  },
+  "keywords": ["auth", "authentication", "integration"],
+  "author": "",
+  "license": "ISC"
+}
