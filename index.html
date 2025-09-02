@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integ - Sign In</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Integ</h1>
+            <nav class="nav-links" style="display: none;">
+                <a href="#" onclick="showSettings()">Settings</a>
+                <a href="#" onclick="signOut()">Sign Out</a>
+            </nav>
+        </div>
+
+        <!-- Sign In Form -->
+        <div id="signin-section" class="signin-section">
+            <h2>Sign In</h2>
+            <form id="signin-form" class="signin-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings-section" class="settings-section" style="display: none;">
+            <h2>Settings</h2>
+            <form id="settings-form" class="settings-form">
+                <div class="form-group">
+                    <label for="display-name">Display Name:</label>
+                    <input type="text" id="display-name" name="display-name" placeholder="Enter your display name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="theme">Theme:</label>
+                    <select id="theme" name="theme">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="notifications" name="notifications">
+                        Enable notifications
+                    </label>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit">Save Settings</button>
+                    <button type="button" onclick="showSignin()">Back to Sign In</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
