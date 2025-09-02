@@ -1,0 +1,11 @@
+{
+  "name": "integ",
+  "version": "1.0.0",
+  "description": "Integration service with auth handling",
+  "main": "auth-handler.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
