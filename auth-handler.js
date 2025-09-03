@@ -17,19 +17,24 @@ class AuthHandler {
      */
     validateToken(token) {
         try {
-            // Legacy token format: simple JWT with basic payload
+            // NEW TOKEN FORMAT: enhanced JWT with additional security fields
             const decoded = jwt.verify(token, this.secret);
             
-            // Legacy tokens have a simple structure
-            if (decoded.userId && decoded.type === 'mobile-onboarding') {
+            // New tokens require enhanced structure with mandatory security fields
+            if (decoded.userId && decoded.type === 'mobile-onboarding' && 
+                decoded.deviceId && decoded.sessionId && decoded.version === '2.0') {
                 return {
                     userId: decoded.userId,
                     type: decoded.type,
+                    deviceId: decoded.deviceId,
+                    sessionId: decoded.sessionId,
+                    version: decoded.version,
                     timestamp: decoded.iat,
-                    isLegacy: true
+                    isLegacy: false
                 };
             }
             
+            // Reject tokens that don't match new format
             return null;
         } catch (error) {
             console.error('Token validation failed:', error.message);
@@ -40,12 +45,17 @@ class AuthHandler {
     /**
      * Generates a new authentication token for mobile onboarding
      * @param {string} userId - The user ID
+     * @param {string} deviceId - The device ID (required for new format)
+     * @param {string} sessionId - The session ID (required for new format)
      * @returns {string} - JWT token
      */
-    generateToken(userId) {
+    generateToken(userId, deviceId, sessionId) {
         const payload = {
             userId: userId,
             type: 'mobile-onboarding',
+            deviceId: deviceId || 'unknown',
+            sessionId: sessionId || 'unknown',
+            version: '2.0',
             iat: Math.floor(Date.now() / 1000)
         };
         

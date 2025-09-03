@@ -21,20 +21,28 @@ app.post('/api/mobile/onboard', authHandler.authenticateRequest.bind(authHandler
         success: true,
         userId: req.user.userId,
         message: 'Mobile onboarding completed successfully',
-        tokenType: req.user.isLegacy ? 'legacy' : 'new',
+        tokenType: req.user.isLegacy ? 'legacy' : 'enhanced',
         timestamp: new Date().toISOString()
     });
 });
 
 // Token generation endpoint for testing
 app.post('/api/auth/token', (req, res) => {
-    const { userId } = req.body;
+    const { userId, deviceId, sessionId } = req.body;
     
     if (!userId) {
         return res.status(400).json({ error: 'userId is required' });
     }
     
-    const token = authHandler.generateToken(userId);
+    if (!deviceId) {
+        return res.status(400).json({ error: 'deviceId is required' });
+    }
+    
+    if (!sessionId) {
+        return res.status(400).json({ error: 'sessionId is required' });
+    }
+    
+    const token = authHandler.generateToken(userId, deviceId, sessionId);
     res.json({ token });
 });
 
