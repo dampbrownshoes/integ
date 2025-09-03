@@ -20,24 +20,41 @@ class AuthHandler {
     return jwt.sign(payload, this.secret, { algorithm: 'HS256' });
   }
 
-  // Verify token with new format only (causes failures for legacy tokens)
+  // Verify token with fallback for legacy tokens (fixed to prevent 400 errors)
   verifyToken(token) {
     try {
       const decoded = jwt.verify(token, this.secret);
       
-      // Strict validation for new format only
-      if (!decoded.uid || !decoded.did || decoded.v !== 2) {
-        throw new Error('Invalid token format');
+      // Try new format first
+      if (decoded.uid && decoded.did && decoded.v === 2) {
+        return {
+          userId: decoded.uid,
+          deviceId: decoded.did,
+          issuedAt: decoded.iat,
+          expiresAt: decoded.exp,
+          tokenVersion: 'v2'
+        };
       }
       
-      return {
-        userId: decoded.uid,
-        deviceId: decoded.did,
-        issuedAt: decoded.iat,
-        expiresAt: decoded.exp
-      };
+      // Fallback to legacy format (pre-change format)
+      if (decoded.user_id && decoded.device_id) {
+        return {
+          userId: decoded.user_id,
+          deviceId: decoded.device_id,
+          issuedAt: decoded.iat,
+          expiresAt: decoded.exp,
+          tokenVersion: 'legacy'
+        };
+      }
+      
+      // If neither format is valid
+      throw new Error('Invalid token format - neither new nor legacy format detected');
+      
     } catch (error) {
-      throw new Error('Token verification failed: ' + error.message);
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new Error('Token verification failed: ' + error.message);
+      }
+      throw error;
     }
   }
 

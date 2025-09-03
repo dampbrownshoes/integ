@@ -33,9 +33,10 @@ describe('AuthHandler', () => {
       
       expect(result.userId).toBe(userId);
       expect(result.deviceId).toBe(deviceId);
+      expect(result.tokenVersion).toBe('v2');
     });
 
-    it('should reject legacy tokens (causing 400 errors)', () => {
+    it('should accept legacy tokens (fix for 400 errors)', () => {
       // Simulate legacy token format that worked before the recent change
       const legacyPayload = {
         user_id: 'user123',  // Old format used underscores
@@ -47,9 +48,10 @@ describe('AuthHandler', () => {
       
       const legacyToken = jwt.sign(legacyPayload, authHandler.secret);
       
-      expect(() => {
-        authHandler.verifyToken(legacyToken);
-      }).toThrow('Invalid token format');
+      const result = authHandler.verifyToken(legacyToken);
+      expect(result.userId).toBe('user123');
+      expect(result.deviceId).toBe('device456');
+      expect(result.tokenVersion).toBe('legacy');
     });
 
     it('should reject tokens without version field', () => {
@@ -84,8 +86,8 @@ describe('AuthHandler', () => {
       expect(result.deviceId).toBe(deviceId);
     });
 
-    it('should fail to validate requests with legacy tokens', () => {
-      // Legacy token that would have worked before the recent change
+    it('should accept requests with legacy tokens (fix for 400 errors)', () => {
+      // Legacy token that should now work after the fix
       const legacyPayload = {
         user_id: 'user123',
         device_id: 'device456',
@@ -98,9 +100,10 @@ describe('AuthHandler', () => {
         authorization: `Bearer ${legacyToken}`
       };
       
-      expect(() => {
-        authHandler.validateRequest(headers);
-      }).toThrow('Token verification failed');
+      const result = authHandler.validateRequest(headers);
+      expect(result.userId).toBe('user123');
+      expect(result.deviceId).toBe('device456');
+      expect(result.tokenVersion).toBe('legacy');
     });
   });
 });
