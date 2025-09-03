@@ -66,6 +66,62 @@ describe('AuthHandler', () => {
             const result = authHandler.validateToken(fakeToken);
             expect(result).toBeNull();
         });
+
+        it('should log token format mismatch for valid token with wrong format', () => {
+            // Mock console.warn to capture log output
+            const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+            
+            // Create a valid JWT with wrong token type
+            const invalidPayload = {
+                userId: 'user123',
+                type: 'wrong-type',  // This should trigger format mismatch
+                iat: Math.floor(Date.now() / 1000)
+            };
+            const invalidToken = jwt.sign(invalidPayload, authHandler.secret);
+            
+            const result = authHandler.validateToken(invalidToken);
+            
+            expect(result).toBeNull();
+            expect(consoleSpy).toHaveBeenCalledWith('Token format mismatch detected:', {
+                hasUserId: true,
+                tokenType: 'wrong-type',
+                hasDeviceId: false,
+                hasSessionId: false,
+                version: 'missing',
+                expectedTypes: ['mobile-onboarding'],
+                receivedFields: ['userId', 'type']
+            });
+            
+            consoleSpy.mockRestore();
+        });
+
+        it('should log token format mismatch for token missing userId', () => {
+            // Mock console.warn to capture log output
+            const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+            
+            // Create a valid JWT without userId
+            const invalidPayload = {
+                type: 'mobile-onboarding',
+                someOtherField: 'value',
+                iat: Math.floor(Date.now() / 1000)
+            };
+            const invalidToken = jwt.sign(invalidPayload, authHandler.secret);
+            
+            const result = authHandler.validateToken(invalidToken);
+            
+            expect(result).toBeNull();
+            expect(consoleSpy).toHaveBeenCalledWith('Token format mismatch detected:', {
+                hasUserId: false,
+                tokenType: 'mobile-onboarding',
+                hasDeviceId: false,
+                hasSessionId: false,
+                version: 'missing',
+                expectedTypes: ['mobile-onboarding'],
+                receivedFields: ['type', 'someOtherField']
+            });
+            
+            consoleSpy.mockRestore();
+        });
     });
 
     describe('authenticateRequest', () => {

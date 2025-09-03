@@ -22,6 +22,7 @@ class AuthHandler {
             // Check for enhanced token format first (v2.0)
             if (decoded.userId && decoded.type === 'mobile-onboarding' && 
                 decoded.deviceId && decoded.sessionId && decoded.version === '2.0') {
+                console.log('Token validation successful: Enhanced format detected');
                 return {
                     userId: decoded.userId,
                     type: decoded.type,
@@ -35,6 +36,7 @@ class AuthHandler {
             
             // Fallback to legacy token format (v1.0) - for backward compatibility
             if (decoded.userId && decoded.type === 'mobile-onboarding') {
+                console.log('Token validation successful: Legacy format detected');
                 return {
                     userId: decoded.userId,
                     type: decoded.type,
@@ -42,6 +44,17 @@ class AuthHandler {
                     isLegacy: true
                 };
             }
+            
+            // Log token format mismatch for debugging
+            console.warn('Token format mismatch detected:', {
+                hasUserId: !!decoded.userId,
+                tokenType: decoded.type || 'missing',
+                hasDeviceId: !!decoded.deviceId,
+                hasSessionId: !!decoded.sessionId,
+                version: decoded.version || 'missing',
+                expectedTypes: ['mobile-onboarding'],
+                receivedFields: Object.keys(decoded).filter(key => key !== 'iat' && key !== 'exp')
+            });
             
             return null;
         } catch (error) {
