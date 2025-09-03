@@ -24,8 +24,21 @@ class AuthHandler {
       return { valid: false, error: 'No token provided', statusCode: 401 };
     }
 
-    const tokenParts = token.split('.');
-    const maskedToken = this._maskToken(token);
+    // Critical edge case: ensure token is a string to prevent crashes
+    if (typeof token !== 'string') {
+      console.warn(`[Auth] Token validation failed: Invalid token type - expected string, got ${typeof token}`);
+      return { valid: false, error: 'Invalid token format - must be string', statusCode: 400 };
+    }
+
+    // Trim whitespace and check for empty/whitespace-only tokens
+    const trimmedToken = token.trim();
+    if (!trimmedToken) {
+      console.warn('[Auth] Token validation failed: Empty or whitespace-only token provided');
+      return { valid: false, error: 'No token provided', statusCode: 401 };
+    }
+
+    const tokenParts = trimmedToken.split('.');
+    const maskedToken = this._maskToken(trimmedToken);
     
     // Try v2.0 format first: bearer.version.payload.signature
     if (tokenParts.length === 4 && tokenParts[1] === '2' && tokenParts[0] === 'bearer') {
@@ -64,9 +77,15 @@ class AuthHandler {
     try {
       const payload = JSON.parse(atob(tokenParts[2]));
       
-      if (!payload.userId || !payload.exp) {
+      if (!payload.userId || payload.exp === undefined || payload.exp === null) {
         console.warn('[Auth] v2.0 token validation failed: Invalid payload structure - missing userId or exp');
         return { valid: false, error: 'Invalid token payload', statusCode: 400 };
+      }
+
+      // Critical edge case: ensure exp is numeric for proper expiration checking
+      if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+        console.warn(`[Auth] v2.0 token validation failed: Invalid expiration format - expected number, got ${typeof payload.exp}: ${payload.exp}`);
+        return { valid: false, error: 'Invalid token expiration', statusCode: 400 };
       }
 
       if (Date.now() > payload.exp * 1000) {
@@ -101,9 +120,15 @@ class AuthHandler {
       if (tokenParts[versionIndex] === '1') {
         const payload = JSON.parse(atob(tokenParts[payloadIndex]));
         
-        if (!payload.userId || !payload.exp) {
+        if (!payload.userId || payload.exp === undefined || payload.exp === null) {
           console.warn('[Auth] Legacy token validation failed: Invalid payload structure - missing userId or exp');
           return { valid: false, error: 'Invalid legacy token payload', statusCode: 400 };
+        }
+
+        // Critical edge case: ensure exp is numeric for proper expiration checking
+        if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+          console.warn(`[Auth] Legacy token validation failed: Invalid expiration format - expected number, got ${typeof payload.exp}: ${payload.exp}`);
+          return { valid: false, error: 'Invalid token expiration', statusCode: 400 };
         }
 
         if (Date.now() > payload.exp * 1000) {
@@ -167,7 +192,7 @@ class AuthHandler {
    * @private
    */
   _maskToken(token) {
-    if (!token || token.length < 10) {
+    if (!token || typeof token !== 'string' || token.length < 10) {
       return '[INVALID_TOKEN]';
     }
     const start = token.substring(0, 6);
