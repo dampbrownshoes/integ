@@ -34,16 +34,13 @@ app.post('/api/auth/token', (req, res) => {
         return res.status(400).json({ error: 'userId is required' });
     }
     
-    if (!deviceId) {
-        return res.status(400).json({ error: 'deviceId is required' });
-    }
-    
-    if (!sessionId) {
-        return res.status(400).json({ error: 'sessionId is required' });
-    }
-    
+    // Generate enhanced token if both deviceId and sessionId are provided
+    // Otherwise generate legacy token for backward compatibility
     const token = authHandler.generateToken(userId, deviceId, sessionId);
-    res.json({ token });
+    res.json({ 
+        token,
+        format: (deviceId && sessionId) ? 'enhanced' : 'legacy'
+    });
 });
 
 // Health check endpoint

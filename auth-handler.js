@@ -11,16 +11,15 @@ class AuthHandler {
     }
 
     /**
-     * Validates incoming authentication tokens
+     * Validates incoming authentication tokens with fallback for legacy tokens
      * @param {string} token - The authentication token
      * @returns {Object} - Decoded token payload or null if invalid
      */
     validateToken(token) {
         try {
-            // NEW TOKEN FORMAT: enhanced JWT with additional security fields
             const decoded = jwt.verify(token, this.secret);
             
-            // New tokens require enhanced structure with mandatory security fields
+            // Check for enhanced token format first (v2.0)
             if (decoded.userId && decoded.type === 'mobile-onboarding' && 
                 decoded.deviceId && decoded.sessionId && decoded.version === '2.0') {
                 return {
@@ -34,7 +33,16 @@ class AuthHandler {
                 };
             }
             
-            // Reject tokens that don't match new format
+            // Fallback to legacy token format (v1.0) - for backward compatibility
+            if (decoded.userId && decoded.type === 'mobile-onboarding') {
+                return {
+                    userId: decoded.userId,
+                    type: decoded.type,
+                    timestamp: decoded.iat,
+                    isLegacy: true
+                };
+            }
+            
             return null;
         } catch (error) {
             console.error('Token validation failed:', error.message);
@@ -45,17 +53,28 @@ class AuthHandler {
     /**
      * Generates a new authentication token for mobile onboarding
      * @param {string} userId - The user ID
-     * @param {string} deviceId - The device ID (required for new format)
-     * @param {string} sessionId - The session ID (required for new format)
+     * @param {string} deviceId - Optional device ID (for enhanced format)
+     * @param {string} sessionId - Optional session ID (for enhanced format)
      * @returns {string} - JWT token
      */
     generateToken(userId, deviceId, sessionId) {
+        // If deviceId and sessionId are provided, generate enhanced token
+        if (deviceId && sessionId) {
+            const payload = {
+                userId: userId,
+                type: 'mobile-onboarding',
+                deviceId: deviceId,
+                sessionId: sessionId,
+                version: '2.0',
+                iat: Math.floor(Date.now() / 1000)
+            };
+            return jwt.sign(payload, this.secret);
+        }
+        
+        // Otherwise, generate legacy token for backward compatibility
         const payload = {
             userId: userId,
             type: 'mobile-onboarding',
-            deviceId: deviceId || 'unknown',
-            sessionId: sessionId || 'unknown',
-            version: '2.0',
             iat: Math.floor(Date.now() / 1000)
         };
         

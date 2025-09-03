@@ -39,6 +39,23 @@ describe('AuthHandler', () => {
             expect(result.isLegacy).toBe(true);
         });
 
+        it('should validate a valid enhanced token', () => {
+            const userId = 'user123';
+            const deviceId = 'device456';
+            const sessionId = 'session789';
+            const token = authHandler.generateToken(userId, deviceId, sessionId);
+            
+            const result = authHandler.validateToken(token);
+            
+            expect(result).toBeDefined();
+            expect(result.userId).toBe(userId);
+            expect(result.type).toBe('mobile-onboarding');
+            expect(result.deviceId).toBe(deviceId);
+            expect(result.sessionId).toBe(sessionId);
+            expect(result.version).toBe('2.0');
+            expect(result.isLegacy).toBe(false);
+        });
+
         it('should return null for invalid token', () => {
             const result = authHandler.validateToken('invalid-token');
             expect(result).toBeNull();
@@ -63,7 +80,7 @@ describe('AuthHandler', () => {
             next = jest.fn();
         });
 
-        it('should authenticate valid request with Bearer token', () => {
+        it('should authenticate valid request with legacy Bearer token', () => {
             const userId = 'user123';
             const token = authHandler.generateToken(userId);
             req.headers.authorization = `Bearer ${token}`;
@@ -73,6 +90,24 @@ describe('AuthHandler', () => {
             expect(next).toHaveBeenCalled();
             expect(req.user).toBeDefined();
             expect(req.user.userId).toBe(userId);
+            expect(req.user.isLegacy).toBe(true);
+        });
+
+        it('should authenticate valid request with enhanced Bearer token', () => {
+            const userId = 'user123';
+            const deviceId = 'device456';
+            const sessionId = 'session789';
+            const token = authHandler.generateToken(userId, deviceId, sessionId);
+            req.headers.authorization = `Bearer ${token}`;
+            
+            authHandler.authenticateRequest(req, res, next);
+            
+            expect(next).toHaveBeenCalled();
+            expect(req.user).toBeDefined();
+            expect(req.user.userId).toBe(userId);
+            expect(req.user.isLegacy).toBe(false);
+            expect(req.user.deviceId).toBe(deviceId);
+            expect(req.user.sessionId).toBe(sessionId);
         });
 
         it('should return 401 for request without authorization header', () => {
