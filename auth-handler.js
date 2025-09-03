@@ -15,17 +15,22 @@ class AuthHandler {
    */
   validateToken(token) {
     if (!token) {
+      console.log('[AUTH] Token validation failed: No token provided');
       throw new Error('Token is required');
     }
+
+    const tokenPrefix = token.substring(0, 10); // Safe prefix for logging
 
     // Try new v2 token format first
     if (token.startsWith(this.NEW_TOKEN_PREFIX)) {
       const tokenData = token.substring(this.NEW_TOKEN_PREFIX.length);
       
       if (tokenData.length < 32) {
+        console.log(`[AUTH] Token validation failed: V2 token too short (${tokenData.length} chars, need 32+)`);
         throw new Error('Token too short');
       }
 
+      console.log('[AUTH] Token validation successful: V2 token format');
       return {
         valid: true,
         userId: this.extractUserId(tokenData),
@@ -38,9 +43,11 @@ class AuthHandler {
       const tokenData = token.substring(this.LEGACY_TOKEN_PREFIX.length);
       
       if (tokenData.length < 32) {
+        console.log(`[AUTH] Token validation failed: Legacy token too short (${tokenData.length} chars, need 32+)`);
         throw new Error('Token too short');
       }
 
+      console.log('[AUTH] Token validation successful: Legacy token format (fallback)');
       return {
         valid: true,
         userId: this.extractUserId(tokenData),
@@ -48,6 +55,8 @@ class AuthHandler {
       };
     }
 
+    // Log token format mismatch for debugging
+    console.log(`[AUTH] Token validation failed: Invalid format - prefix "${tokenPrefix}" does not match expected formats (${this.NEW_TOKEN_PREFIX} or ${this.LEGACY_TOKEN_PREFIX})`);
     throw new Error('Invalid token format');
   }
 
