@@ -27,6 +27,7 @@ class AuthHandler {
       
       // Try new format first
       if (decoded.uid && decoded.did && decoded.v === 2) {
+        console.log(`[AUTH] New format token detected - userId: ${decoded.uid}, deviceId: ${decoded.did}`);
         return {
           userId: decoded.uid,
           deviceId: decoded.did,
@@ -38,6 +39,7 @@ class AuthHandler {
       
       // Fallback to legacy format (pre-change format)
       if (decoded.user_id && decoded.device_id) {
+        console.warn(`[AUTH] Legacy format token detected - userId: ${decoded.user_id}, deviceId: ${decoded.device_id}`);
         return {
           userId: decoded.user_id,
           deviceId: decoded.device_id,
@@ -48,10 +50,12 @@ class AuthHandler {
       }
       
       // If neither format is valid
+      console.error('[AUTH] Token format mismatch - neither new nor legacy format detected');
       throw new Error('Invalid token format - neither new nor legacy format detected');
       
     } catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        console.error(`[AUTH] Token verification failed: ${error.message}`);
         throw new Error('Token verification failed: ' + error.message);
       }
       throw error;
