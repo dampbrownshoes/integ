@@ -1,0 +1,19 @@
+{
+  "name": "mobile-auth-integration",
+  "version": "1.0.0",
+  "description": "Mobile onboarding authentication handler with legacy token support",
+  "main": "auth-handler.js",
+  "scripts": {
+    "test": "node comprehensive-test.js",
+    "test:basic": "node test-auth.js"
+  },
+  "keywords": [
+    "authentication",
+    "mobile",
+    "onboarding",
+    "tokens",
+    "legacy-support"
+  ],
+  "author": "dampbrownshoes",
+  "license": "MIT"
+}
