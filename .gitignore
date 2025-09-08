@@ -1,0 +1,20 @@
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+*~
+
+# Log files
+*.log
+
+# Email processing temporary files
+/tmp/lullaby_email_*.html
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Browser automation files
+/tmp/playwright-logs/
