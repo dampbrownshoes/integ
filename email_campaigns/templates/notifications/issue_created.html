@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Sweet Dreams, New Issue</title>
+    <style>
+        body { font-family: 'Georgia', serif; color: #4a5568; line-height: 1.6; background: linear-gradient(135deg, #e8f4fd 0%, #d6f1ff 100%); margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(45deg, #74b9ff, #a29bfe); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; }
+        .lullaby { font-style: italic; color: #6c7b7f; margin: 20px 0; padding: 20px; background: #f8f9fa; border-left: 4px solid #74b9ff; border-radius: 8px; }
+        .details { background: #fff5f5; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #718096; font-size: 14px; }
+        .moon { font-size: 24px; }
+        .star { color: #ffd700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="moon">🌙</div>
+            <h1>Hush now, a new issue sleeps...</h1>
+        </div>
+        
+        <div class="content">
+            <div class="lullaby">
+                <em>Rock-a-bye issue, in the system tree,<br>
+                When the code breaks, the bug will decree.<br>
+                But worry not gentle developer dear,<br>
+                For help and solutions will soon appear...</em>
+            </div>
+            
+            <p>A gentle notification drifts in on soft clouds to let you know that a new issue has been created and is now resting peacefully in our tracking system.</p>
+            
+            <div class="details">
+                <h3><span class="star">⭐</span> Issue Details</h3>
+                <p><strong>Title:</strong> {{ISSUE_TITLE}}</p>
+                <p><strong>ID:</strong> {{ISSUE_ID}}</p>
+                <p><strong>Created:</strong> {{CREATED_DATE}}</p>
+                <p><strong>Description:</strong></p>
+                <p>{{ISSUE_DESCRIPTION}}</p>
+            </div>
+            
+            <div class="lullaby">
+                <em>Sleep tight little issue, till morning's light,<br>
+                When developers wake to make everything right.<br>
+                In dreams of solutions, you'll peacefully stay,<br>
+                Until fixing time comes with the new day...</em>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><span class="star">✨</span> Sweet dreams from your Integration System <span class="star">✨</span></p>
+            <p>May your code be bug-free and your deployments serene</p>
+        </div>
+    </div>
+</body>
+</html>
