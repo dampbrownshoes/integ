@@ -1,0 +1,14 @@
+{
+  "name": "launch-banner-mobile-fix",
+  "version": "1.0.0",
+  "description": "A web application with a mobile-responsive launch banner",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "serve": "python3 -m http.server 8080",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": ["banner", "mobile", "responsive", "web"],
+  "author": "Developer",
+  "license": "MIT"
+}
