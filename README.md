@@ -13,6 +13,15 @@ Integration testing repository for app publishing pipeline.
 - Apps using older SDK versions (2.0.x) now show a warning but are still published
 - Apps using very old SDK versions (below 2.0.0) are still appropriately blocked
 
+### Repository Information
+
+This repository is hosted on <span style="color: #0366d6; font-weight: bold;">**GitHub**</span> and uses <span style="color: #0366d6; font-weight: bold;">**GitHub**</span> Actions for continuous integration. The workflow file is configured to trigger on pushes to the main branch and pull requests.
+
+The <span style="color: #0366d6; font-weight: bold;">**GitHub**</span> Actions pipeline includes:
+- SDK version checking
+- App validation
+- Publishing workflow
+
 ### Testing
 
 Run the publishing pipeline:
@@ -24,3 +33,11 @@ Run tests:
 ```bash
 npm test
 ```
+
+### Contributing
+
+When contributing to this repository on <span style="color: #0366d6; font-weight: bold;">**GitHub**</span>, please:
+1. Create a feature branch
+2. Make your changes
+3. Submit a pull request via <span style="color: #0366d6; font-weight: bold;">**GitHub**</span>
+4. Ensure all <span style="color: #0366d6; font-weight: bold;">**GitHub**</span> Actions checks pass
