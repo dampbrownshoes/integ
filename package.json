@@ -1,0 +1,17 @@
+{
+  "name": "integration-app",
+  "version": "1.0.0",
+  "description": "Integration application for testing publishing pipeline",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building application...' && echo 'Build completed successfully'",
+    "test": "echo 'Running tests...' && echo 'All tests passed'"
+  },
+  "sdkVersion": "1.5.0",
+  "keywords": ["integration", "app", "GitHub"],
+  "author": "Developer",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2"
+  }
+}

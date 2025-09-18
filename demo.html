@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Text Styling Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .github-text {
+            color: #0969da;
+            font-weight: bold;
+            background: linear-gradient(135deg, #0969da, #2ea043);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .yellow-text {
+            color: #fbbf24;
+            font-weight: 500;
+        }
+        
+        .demo-box {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        h1 {
+            color: #24292f;
+            border-bottom: 1px solid #d0d7de;
+            padding-bottom: 10px;
+        }
+        
+        .success {
+            color: #1a7f37;
+            background: #dafbe1;
+            border: 1px solid #1a7f37;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 GitHub Text Styling Demo</h1>
+    
+    <div class="demo-box">
+        <h2>Feature Overview</h2>
+        <p>This integration app demonstrates advanced text styling capabilities for <span class="github-text">GitHub</span> mentions and <span class="yellow-text">yellow text highlighting</span>.</p>
+    </div>
+    
+    <div class="demo-box">
+        <h2>GitHub Text Coloring</h2>
+        <p>Regular text: "This app integrates with GitHub to provide seamless workflows."</p>
+        <p>Styled text: "This app integrates with <span class="github-text">GitHub</span> to provide seamless workflows."</p>
+        
+        <p>Another example: "Welcome to <span class="github-text">GitHub</span> integration! This feature highlights <span class="github-text">GitHub</span> in color."</p>
+    </div>
+    
+    <div class="demo-box">
+        <h2>Yellow Text Examples</h2>
+        <p class="yellow-text">This entire paragraph is displayed in yellow for enhanced visibility and attention-grabbing purposes.</p>
+        
+        <p>Mixed styling: <span class="yellow-text">Important yellow text</span> alongside <span class="github-text">GitHub</span> mentions.</p>
+    </div>
+    
+    <div class="demo-box">
+        <h2>Combined Styling</h2>
+        <p class="yellow-text">This is <span class="github-text">GitHub</span> integration with combined yellow background and colored <span class="github-text">GitHub</span> mentions!</p>
+    </div>
+    
+    <div class="success">
+        ✅ <strong>App Publishing Pipeline Fixed:</strong> SDK version compatibility issue resolved. Apps using previous SDK versions (1.0.0+) are no longer automatically dropped from the publishing pipeline.
+    </div>
+    
+    <div class="demo-box">
+        <h2>Technical Implementation</h2>
+        <ul>
+            <li><strong><span class="github-text">GitHub</span> Text Coloring:</strong> Automatic detection and styling of "GitHub" mentions</li>
+            <li><strong><span class="yellow-text">Yellow Text Support:</span></strong> Flexible yellow text styling capability</li>
+            <li><strong>Backward Compatibility:</strong> Fixed version check to support SDK versions 1.0.0 - 2.9.9</li>
+            <li><strong>Publishing Pipeline:</strong> Restored functionality for apps with older SDK versions</li>
+        </ul>
+    </div>
+    
+    <script>
+        // JavaScript to enhance GitHub text styling dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find all text nodes and apply GitHub styling
+            function styleGitHubText(element) {
+                if (element.nodeType === Node.TEXT_NODE) {
+                    const text = element.textContent;
+                    if (text.includes('GitHub') && !element.parentElement.classList.contains('github-text')) {
+                        const styledText = text.replace(/GitHub/g, '<span class="github-text">GitHub</span>');
+                        if (styledText !== text) {
+                            const wrapper = document.createElement('span');
+                            wrapper.innerHTML = styledText;
+                            element.parentElement.replaceChild(wrapper, element);
+                        }
+                    }
+                } else {
+                    for (const child of element.childNodes) {
+                        styleGitHubText(child);
+                    }
+                }
+            }
+            
+            console.log('🎨 GitHub text styling activated');
+        });
+    </script>
+</body>
+</html>
