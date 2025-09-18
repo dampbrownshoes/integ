@@ -1,0 +1,22 @@
+{
+  "name": "integ-signin-validator",
+  "version": "1.0.0",
+  "description": "Signin validation system with irrational character handling",
+  "main": "signin.js",
+  "scripts": {
+    "test": "node test-signin.js",
+    "example": "node example.js"
+  },
+  "keywords": [
+    "signin",
+    "validation",
+    "security",
+    "authentication",
+    "character-validation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
