@@ -46,7 +46,7 @@ function demonstrateSigninValidation() {
     testCases.forEach((testCase, index) => {
         console.log(`Test ${index + 1}: ${testCase.description}`);
         console.log(`Username: "${testCase.username}"`);
-        console.log(`Password: "${testCase.password}"`);
+        console.log(`Password: "${testCase.password.replace(/./g, '*')}"  (masked for security)`);
         
         const result = validator.validateSignin(testCase.username, testCase.password);
         

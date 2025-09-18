@@ -132,10 +132,21 @@ class SigninValidator {
         }
 
         // Remove control characters and non-printable characters
-        return input.replace(/[\x00-\x1F\x7F]/g, '')
-                   .replace(/<[^>]*>/g, '') // Remove HTML tags
-                   .replace(/[\"'&]/g, '') // Remove remaining potential XSS characters
-                   .trim();
+        let sanitized = input.replace(/[\x00-\x1F\x7F]/g, '');
+        
+        // Remove potentially dangerous characters for XSS prevention
+        sanitized = sanitized.replace(/[<>&"']/g, '');
+        
+        // Remove script tags using indexOf for better performance and security
+        const scriptPatterns = ['<script', '</script', 'javascript:', 'onclick=', 'onerror='];
+        for (const pattern of scriptPatterns) {
+            while (sanitized.toLowerCase().indexOf(pattern) !== -1) {
+                const index = sanitized.toLowerCase().indexOf(pattern);
+                sanitized = sanitized.substring(0, index) + sanitized.substring(index + pattern.length);
+            }
+        }
+        
+        return sanitized.trim();
     }
 }
 

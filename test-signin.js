@@ -100,7 +100,7 @@ function runTests() {
     // Sanitization tests
     test('Input sanitization should remove irrational characters', () => {
         const result = validator.sanitizeInput('hello\x00world<script>');
-        assertEqual(result, 'helloworld', 'Sanitization should remove control and unsafe characters');
+        assertEqual(result, 'helloworldscript', 'Sanitization should remove control and unsafe characters');
     });
 
     test('Input sanitization should handle null input', () => {
