@@ -1,0 +1,33 @@
+name: App Publishing Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Validate app configuration
+      run: node scripts/validate-app.js
+      
+    - name: Check SDK version compatibility
+      run: node scripts/check-sdk-version.js
+      
+    - name: Publish app
+      if: success()
+      run: node scripts/publish-app.js
+      env:
+        PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}

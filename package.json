@@ -1,0 +1,21 @@
+{
+  "name": "integ-app-publisher",
+  "version": "1.0.0",
+  "description": "Integration test for app publishing pipeline",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "validate": "node scripts/validate-app.js",
+    "check-version": "node scripts/check-sdk-version.js",
+    "publish": "node scripts/publish-app.js"
+  },
+  "dependencies": {
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
