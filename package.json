@@ -1,0 +1,12 @@
+{
+  "name": "integ",
+  "version": "1.0.0",
+  "description": "Integration project with mobile app publishing pipeline",
+  "main": "auth-handler.js",
+  "scripts": {
+    "test": "node test/auth-handler.test.js",
+    "demo": "node demo.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
