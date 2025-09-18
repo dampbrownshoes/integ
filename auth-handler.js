@@ -6,11 +6,12 @@
 class AuthHandler {
   constructor() {
     this.NEW_TOKEN_PREFIX = 'mob_v2_';
+    this.LEGACY_TOKEN_PREFIX = 'mob_';
   }
 
   /**
    * Validates authentication token
-   * STRICT VERSION: Only supports new v2 tokens - DROPS legacy SDK apps
+   * REVERTED: Now supports both v2 tokens and legacy tokens as fallback
    */
   validateToken(token) {
     if (!token) {
@@ -18,25 +19,45 @@ class AuthHandler {
       throw new Error('Token is required');
     }
 
-    // STRICT CHECK: Only accept new v2 token format
-    if (!token.startsWith(this.NEW_TOKEN_PREFIX)) {
-      console.log(`[AUTH] Token validation failed: Legacy token format not supported`);
-      throw new Error('Legacy token format not supported. Please update your SDK.');
-    }
+    const tokenPrefix = token.substring(0, 10); // Safe prefix for logging
 
-    const tokenData = token.substring(this.NEW_TOKEN_PREFIX.length);
+    // Try new v2 token format first
+    if (token.startsWith(this.NEW_TOKEN_PREFIX)) {
+      const tokenData = token.substring(this.NEW_TOKEN_PREFIX.length);
+      
+      if (tokenData.length < 32) {
+        console.log(`[AUTH] Token validation failed: V2 token too short (${tokenData.length} chars, need 32+)`);
+        throw new Error('Token too short');
+      }
+
+      console.log('[AUTH] Token validation successful: V2 token format');
+      return {
+        valid: true,
+        userId: this.extractUserId(tokenData),
+        tokenType: 'v2'
+      };
+    }
     
-    if (tokenData.length < 32) {
-      console.log(`[AUTH] Token validation failed: V2 token too short (${tokenData.length} chars, need 32+)`);
-      throw new Error('Token too short');
+    // Fallback: Support legacy token format (REVERT of strict version check)
+    if (token.startsWith(this.LEGACY_TOKEN_PREFIX) && !token.startsWith(this.NEW_TOKEN_PREFIX)) {
+      const tokenData = token.substring(this.LEGACY_TOKEN_PREFIX.length);
+      
+      if (tokenData.length < 32) {
+        console.log(`[AUTH] Token validation failed: Legacy token too short (${tokenData.length} chars, need 32+)`);
+        throw new Error('Token too short');
+      }
+
+      console.log('[AUTH] Token validation successful: Legacy token format (fallback)');
+      return {
+        valid: true,
+        userId: this.extractUserId(tokenData),
+        tokenType: 'legacy'
+      };
     }
 
-    console.log('[AUTH] Token validation successful: V2 token format');
-    return {
-      valid: true,
-      userId: this.extractUserId(tokenData),
-      tokenType: 'v2'
-    };
+    // Log token format mismatch for debugging
+    console.log(`[AUTH] Token validation failed: Invalid format - prefix "${tokenPrefix}" does not match expected formats (${this.NEW_TOKEN_PREFIX} or ${this.LEGACY_TOKEN_PREFIX})`);
+    throw new Error('Invalid token format');
   }
 
   /**

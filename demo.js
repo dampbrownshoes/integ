@@ -8,7 +8,7 @@ function demonstrateIssue() {
   const authHandler = new AuthHandler();
   
   console.log('🚀 Mobile App Publishing Pipeline Demo\n');
-  console.log('This demonstrates the version check issue where legacy SDK apps are dropped.\n');
+  console.log('This demonstrates the FIXED version where legacy SDK apps are now supported.\n');
 
   // Simulate a legacy app trying to publish
   console.log('📱 Legacy App (using previous SDK) trying to publish:');
@@ -32,10 +32,11 @@ function demonstrateIssue() {
     console.log(`❌ Failed: ${error.message}`);
   }
 
-  console.log('\n🔧 SOLUTION NEEDED:');
-  console.log('   Revert the strict version check to support both:');
-  console.log('   - New v2 tokens (mob_v2_*)');
-  console.log('   - Legacy tokens (mob_*) with fallback support');
+  console.log('✅ ISSUE RESOLVED:');
+  console.log('   Reverted the strict version check to support both:');
+  console.log('   - New v2 tokens (mob_v2_*) ✅');
+  console.log('   - Legacy tokens (mob_*) with fallback support ✅');
+  console.log('   📱 Legacy SDK apps are no longer dropped!');
 }
 
 if (require.main === module) {

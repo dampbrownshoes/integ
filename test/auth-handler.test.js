@@ -18,7 +18,7 @@ function runTests() {
     {
       name: 'Legacy token (previous SDK version)',
       token: 'Bearer mob_abcdefghijklmnopqrstuvwxyz123456',
-      expectedResult: 'SHOULD WORK BUT GETS DROPPED'
+      expectedResult: 'SUCCESS (after revert)'
     },
     {
       name: 'Invalid token',
@@ -41,8 +41,8 @@ function runTests() {
     console.log('---\n');
   });
 
-  console.log('🚨 ISSUE: Legacy SDK apps are being dropped due to strict version checking!');
-  console.log('📝 Solution: Need to revert the strict version check and add fallback support for legacy tokens');
+  console.log('✅ ISSUE RESOLVED: Legacy SDK apps are now supported with fallback authentication!');
+  console.log('📝 Solution: Reverted strict version check and added fallback support for legacy tokens');
 }
 
 if (require.main === module) {
