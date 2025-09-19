@@ -1,0 +1,17 @@
+{
+  "name": "integ",
+  "version": "1.0.0",
+  "description": "A simple integration testing project demonstrating basic development workflows",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node tests/test.js",
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "integration",
+    "testing",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT"
+}
