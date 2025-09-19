@@ -96,6 +96,73 @@ class SigninValidator {
     }
 
     /**
+     * NEW CLAUSE: Specific irrational character categorization and detection
+     * This method provides detailed analysis of what types of irrational characters are present
+     * @param {string} input - The input to analyze
+     * @returns {object} Detailed irrational character analysis
+     */
+    analyzeIrrationalCharacters(input) {
+        if (!input || typeof input !== 'string') {
+            return {
+                hasIrrationalChars: false,
+                categories: [],
+                details: 'Input is empty or not a string'
+            };
+        }
+
+        const categories = [];
+        const details = [];
+
+        // Check for control characters
+        if (/[\x00-\x1F\x7F]/.test(input)) {
+            categories.push('CONTROL_CHARACTERS');
+            details.push('Contains control characters (null, tab, newline, escape sequences)');
+        }
+
+        // Check for HTML/XSS characters
+        if (/[<>]/.test(input)) {
+            categories.push('HTML_INJECTION_RISK');
+            details.push('Contains HTML tag characters that pose injection risks');
+        }
+
+        // Check for quote characters that can break string contexts
+        if (/["']/.test(input)) {
+            categories.push('QUOTE_CHARACTERS');
+            details.push('Contains quote characters that can break string contexts');
+        }
+
+        // Check for ampersand (HTML entity risk)
+        if (/&/.test(input)) {
+            categories.push('ENTITY_CHARACTERS');
+            details.push('Contains ampersand which can form HTML entities');
+        }
+
+        // Check for non-ASCII characters
+        if (/[^\x00-\x7F]/.test(input)) {
+            categories.push('NON_ASCII');
+            details.push('Contains non-ASCII characters that may cause encoding issues');
+        }
+
+        // Check for Unicode emoji
+        if (/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/u.test(input)) {
+            categories.push('EMOJI_UNICODE');
+            details.push('Contains emoji or special Unicode characters');
+        }
+
+        // Check for invisible characters
+        if (/[\u200B-\u200D\uFEFF]/.test(input)) {
+            categories.push('INVISIBLE_CHARACTERS');
+            details.push('Contains invisible Unicode characters (zero-width spaces, etc.)');
+        }
+
+        return {
+            hasIrrationalChars: categories.length > 0,
+            categories: categories,
+            details: details.join('; ')
+        };
+    }
+
+    /**
      * Main signin validation function
      * @param {string} username - The username
      * @param {string} password - The password
@@ -105,19 +172,31 @@ class SigninValidator {
         const usernameValidation = this.validateUsername(username);
         const passwordValidation = this.validatePassword(password);
 
+        // NEW CLAUSE: Add detailed irrational character analysis
+        const usernameAnalysis = this.analyzeIrrationalCharacters(username);
+        const passwordAnalysis = this.analyzeIrrationalCharacters(password);
+
         if (!usernameValidation.valid || !passwordValidation.valid) {
             return {
                 success: false,
                 errors: {
                     username: usernameValidation.valid ? null : usernameValidation.reason,
                     password: passwordValidation.valid ? null : passwordValidation.reason
+                },
+                irrationalCharacterAnalysis: {
+                    username: usernameAnalysis,
+                    password: passwordAnalysis
                 }
             };
         }
 
         return {
             success: true,
-            message: 'Signin credentials are valid'
+            message: 'Signin credentials are valid',
+            irrationalCharacterAnalysis: {
+                username: usernameAnalysis,
+                password: passwordAnalysis
+            }
         };
     }
 

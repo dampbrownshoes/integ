@@ -14,6 +14,7 @@ This repository provides a robust signin validation system that specifically han
   - Potentially unsafe characters for XSS prevention
   - Non-ASCII characters that may cause encoding issues
 - **Input Sanitization**: Provides utilities to clean user input
+- **NEW CLAUSE: Detailed Irrational Character Analysis**: Categorizes and provides detailed analysis of different types of irrational characters found in input
 
 ### What are "Irrational Characters"?
 
@@ -38,6 +39,11 @@ if (result.success) {
 } else {
     console.log('Signin failed:', result.errors);
 }
+
+// NEW CLAUSE: Analyze specific types of irrational characters
+const analysis = validator.analyzeIrrationalCharacters('user<script>');
+console.log('Irrational character categories:', analysis.categories);
+console.log('Details:', analysis.details);
 
 // Sanitize user input
 const clean = validator.sanitizeInput('user<script>input');

@@ -97,6 +97,32 @@ function runTests() {
         assertEqual(result.success, false, 'Signin with irrational password should fail');
     });
 
+    // NEW CLAUSE: Irrational character analysis tests
+    test('Irrational character analysis should detect control characters', () => {
+        const result = validator.analyzeIrrationalCharacters('user\x00name');
+        assertEqual(result.hasIrrationalChars, true, 'Should detect control characters');
+        assertEqual(result.categories.includes('CONTROL_CHARACTERS'), true, 'Should categorize control characters');
+    });
+
+    test('Irrational character analysis should detect HTML injection risk', () => {
+        const result = validator.analyzeIrrationalCharacters('user<script>');
+        assertEqual(result.hasIrrationalChars, true, 'Should detect HTML characters');
+        assertEqual(result.categories.includes('HTML_INJECTION_RISK'), true, 'Should categorize HTML injection risk');
+    });
+
+    test('Irrational character analysis should detect multiple categories', () => {
+        const result = validator.analyzeIrrationalCharacters('user<>"test\x00');
+        assertEqual(result.hasIrrationalChars, true, 'Should detect multiple irrational character types');
+        assertEqual(result.categories.length >= 2, true, 'Should detect multiple categories');
+    });
+
+    test('Signin validation should include irrational character analysis', () => {
+        const result = validator.validateSignin('user<test>', 'ValidPass123!');
+        assertEqual(result.success, false, 'Signin should fail with irrational characters');
+        assertEqual(typeof result.irrationalCharacterAnalysis, 'object', 'Should include analysis object');
+        assertEqual(result.irrationalCharacterAnalysis.username.hasIrrationalChars, true, 'Should detect username irrational chars');
+    });
+
     // Sanitization tests
     test('Input sanitization should remove irrational characters', () => {
         const result = validator.sanitizeInput('hello\x00world<script>');

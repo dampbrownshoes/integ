@@ -61,6 +61,21 @@ function demonstrateSigninValidation() {
                 console.log(`   Password error: ${result.errors.password}`);
             }
         }
+        
+        // NEW CLAUSE: Show detailed irrational character analysis
+        if (result.irrationalCharacterAnalysis) {
+            const usernameAnalysis = result.irrationalCharacterAnalysis.username;
+            const passwordAnalysis = result.irrationalCharacterAnalysis.password;
+            
+            if (usernameAnalysis.hasIrrationalChars) {
+                console.log(`   🔍 Username irrational chars: ${usernameAnalysis.categories.join(', ')}`);
+                console.log(`      Details: ${usernameAnalysis.details}`);
+            }
+            if (passwordAnalysis.hasIrrationalChars) {
+                console.log(`   🔍 Password irrational chars: ${passwordAnalysis.categories.join(', ')}`);
+                console.log(`      Details: ${passwordAnalysis.details}`);
+            }
+        }
         console.log('');
     });
 
@@ -78,6 +93,30 @@ function demonstrateSigninValidation() {
         const sanitized = validator.sanitizeInput(input);
         console.log(`Input ${index + 1}: "${input}"`);
         console.log(`Sanitized: "${sanitized}"`);
+        console.log('');
+    });
+
+    // NEW CLAUSE: Demonstrate detailed irrational character analysis
+    console.log('=== NEW CLAUSE: Detailed Irrational Character Analysis ===\n');
+    
+    const analysisInputs = [
+        'normal_user123',
+        'user\x00\x1Fwith_control',
+        'user<script>alert("xss")</script>',
+        'user"with\'quotes&ampersand',
+        'user🚀with🎉emoji',
+        'üser_with_ñon_ascii',
+        'user\u200Bwith\uFEFFinvisible'
+    ];
+
+    analysisInputs.forEach((input, index) => {
+        const analysis = validator.analyzeIrrationalCharacters(input);
+        console.log(`Analysis ${index + 1}: "${input}"`);
+        console.log(`Has irrational chars: ${analysis.hasIrrationalChars}`);
+        if (analysis.hasIrrationalChars) {
+            console.log(`Categories: ${analysis.categories.join(', ')}`);
+            console.log(`Details: ${analysis.details}`);
+        }
         console.log('');
     });
 }
