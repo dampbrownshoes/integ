@@ -117,16 +117,37 @@ class SignInManager {
         const signInTime = localStorage.getItem('signInTime');
         const formattedTime = signInTime ? new Date(signInTime).toLocaleString() : 'Unknown';
 
-        document.body.innerHTML = `
-            <div class="container">
-                <div class="success-page">
-                    <h1>Welcome!</h1>
-                    <p>You have successfully signed in as <strong>${userEmail}</strong></p>
-                    <p>Sign-in time: ${formattedTime}</p>
-                    <button class="logout-btn" onclick="signInManager.signOut()">Sign Out</button>
-                </div>
-            </div>
-        `;
+        // Create elements safely to prevent XSS
+        document.body.innerHTML = '';
+        const container = document.createElement('div');
+        container.className = 'container';
+        
+        const successPage = document.createElement('div');
+        successPage.className = 'success-page';
+        
+        const heading = document.createElement('h1');
+        heading.textContent = 'Welcome!';
+        
+        const emailParagraph = document.createElement('p');
+        emailParagraph.innerHTML = 'You have successfully signed in as ';
+        const emailStrong = document.createElement('strong');
+        emailStrong.textContent = userEmail; // Safe text content assignment
+        emailParagraph.appendChild(emailStrong);
+        
+        const timeParagraph = document.createElement('p');
+        timeParagraph.textContent = `Sign-in time: ${formattedTime}`;
+        
+        const logoutButton = document.createElement('button');
+        logoutButton.className = 'logout-btn';
+        logoutButton.textContent = 'Sign Out';
+        logoutButton.onclick = () => this.signOut();
+        
+        successPage.appendChild(heading);
+        successPage.appendChild(emailParagraph);
+        successPage.appendChild(timeParagraph);
+        successPage.appendChild(logoutButton);
+        container.appendChild(successPage);
+        document.body.appendChild(container);
     }
 }
 
