@@ -61,6 +61,25 @@ class TestApp(unittest.TestCase):
         result = app.handle_subscribe()
         self.assertIn('provide an email', result)
     
+    def test_subscribe_invalid_email(self):
+        """Test subscribing an invalid email format."""
+        result = app.handle_subscribe('invalid-email')
+        self.assertIn('Invalid email format', result)
+        
+        result = app.handle_subscribe('test@')
+        self.assertIn('Invalid email format', result)
+        
+        result = app.handle_subscribe('@example.com')
+        self.assertIn('Invalid email format', result)
+    
+    def test_is_valid_email(self):
+        """Test email validation."""
+        self.assertTrue(app.is_valid_email('test@example.com'))
+        self.assertTrue(app.is_valid_email('user.name@example.co.uk'))
+        self.assertFalse(app.is_valid_email('invalid'))
+        self.assertFalse(app.is_valid_email('test@'))
+        self.assertFalse(app.is_valid_email('@example.com'))
+    
     def test_subscribe_list_empty(self):
         """Test listing subscribers when list is empty."""
         result = app.handle_subscribe_list()

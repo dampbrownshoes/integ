@@ -13,14 +13,23 @@ SUBSCRIBERS_FILE = "subscribers.json"
 def load_subscribers():
     """Load subscribers from file."""
     if os.path.exists(SUBSCRIBERS_FILE):
-        with open(SUBSCRIBERS_FILE, 'r') as f:
-            return json.load(f)
+        try:
+            with open(SUBSCRIBERS_FILE, 'r') as f:
+                return json.load(f)
+        except (IOError, PermissionError, json.JSONDecodeError) as e:
+            print(f"Warning: Could not load subscribers: {e}")
+            return []
     return []
 
 def save_subscribers(subscribers):
     """Save subscribers to file."""
-    with open(SUBSCRIBERS_FILE, 'w') as f:
-        json.dump(subscribers, f, indent=2)
+    try:
+        with open(SUBSCRIBERS_FILE, 'w') as f:
+            json.dump(subscribers, f, indent=2)
+    except (IOError, PermissionError) as e:
+        print(f"Error: Could not save subscribers: {e}")
+        return False
+    return True
 
 def handle_greeting(greeting_type):
     """Handle greeting commands."""
@@ -31,10 +40,19 @@ def handle_greeting(greeting_type):
     }
     return greetings.get(greeting_type.lower(), 'Hi!')
 
+def is_valid_email(email):
+    """Validate email format."""
+    import re
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
 def handle_subscribe(email=None):
     """Handle subscribe command."""
     if not email:
         return "Please provide an email address to subscribe."
+    
+    if not is_valid_email(email):
+        return "Invalid email format. Please provide a valid email address."
     
     subscribers = load_subscribers()
     
@@ -42,7 +60,8 @@ def handle_subscribe(email=None):
         return f"{email} is already subscribed."
     
     subscribers.append(email)
-    save_subscribers(subscribers)
+    if not save_subscribers(subscribers):
+        return "Error: Could not save subscription."
     return f"{email} has been successfully subscribed!"
 
 def handle_subscribe_list():
