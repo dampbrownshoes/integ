@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (password.length < MIN_PASSWORD_LENGTH) {
-            showMessage('Password must be at least ' + MIN_PASSWORD_LENGTH + ' characters long', 'error');
+            showMessage(`Password must be at least ${MIN_PASSWORD_LENGTH} characters long`, 'error');
             return;
         }
 
