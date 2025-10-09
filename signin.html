@@ -120,14 +120,13 @@
             margin-top: 20px;
         }
 
-        .forgot-password a {
+        .forgot-password .disabled-link {
             color: #667eea;
             text-decoration: none;
             font-size: 14px;
-        }
-
-        .forgot-password a:hover {
-            text-decoration: underline;
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: default;
         }
 
         .success-message {
@@ -185,7 +184,7 @@
         </form>
 
         <div class="forgot-password">
-            <a href="#" role="button" aria-disabled="true" style="pointer-events: none; opacity: 0.6;">Forgot your password?</a>
+            <span class="disabled-link" role="button" aria-disabled="true" tabindex="-1">Forgot your password?</span>
         </div>
     </div>
 
