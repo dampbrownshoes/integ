@@ -156,7 +156,7 @@
             Sign in successful!
         </div>
 
-        <form id="signinForm" novalidate>
+        <form id="signinForm">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input 
@@ -185,7 +185,7 @@
         </form>
 
         <div class="forgot-password">
-            <a href="#">Forgot your password?</a>
+            <a href="#" role="button" aria-disabled="true" style="pointer-events: none; opacity: 0.6;">Forgot your password?</a>
         </div>
     </div>
 
@@ -265,7 +265,6 @@
 
                     setTimeout(function() {
                         console.log('Sign in successful!');
-                        console.log('Username:', usernameInput.value);
                         
                         // Reset form
                         form.reset();
