@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .signin-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .signin-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .signin-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .signin-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input.error {
+            border-color: #e74c3c;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .signin-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .signin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .signin-button:active {
+            transform: translateY(0);
+        }
+
+        .signin-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .success-message {
+            background: #2ecc71;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="signin-container">
+        <div class="signin-header">
+            <h1>Welcome Back</h1>
+            <p>Please sign in to your account</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Sign in successful!
+        </div>
+
+        <form id="signinForm" novalidate>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="Enter your username"
+                    required
+                >
+                <div class="error-message" id="usernameError">Please enter a valid username</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Enter your password"
+                    required
+                >
+                <div class="error-message" id="passwordError">Please enter your password</div>
+            </div>
+
+            <button type="submit" class="signin-button">Sign In</button>
+        </form>
+
+        <div class="forgot-password">
+            <a href="#">Forgot your password?</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signinForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const usernameError = document.getElementById('usernameError');
+            const passwordError = document.getElementById('passwordError');
+            const successMessage = document.getElementById('successMessage');
+
+            // Real-time validation
+            usernameInput.addEventListener('input', function() {
+                validateUsername();
+            });
+
+            passwordInput.addEventListener('input', function() {
+                validatePassword();
+            });
+
+            function validateUsername() {
+                const username = usernameInput.value.trim();
+                
+                if (username === '') {
+                    usernameInput.classList.add('error');
+                    usernameError.textContent = 'Username is required';
+                    usernameError.classList.add('show');
+                    return false;
+                } else if (username.length < 3) {
+                    usernameInput.classList.add('error');
+                    usernameError.textContent = 'Username must be at least 3 characters';
+                    usernameError.classList.add('show');
+                    return false;
+                } else {
+                    usernameInput.classList.remove('error');
+                    usernameError.classList.remove('show');
+                    return true;
+                }
+            }
+
+            function validatePassword() {
+                const password = passwordInput.value;
+                
+                if (password === '') {
+                    passwordInput.classList.add('error');
+                    passwordError.textContent = 'Password is required';
+                    passwordError.classList.add('show');
+                    return false;
+                } else if (password.length < 6) {
+                    passwordInput.classList.add('error');
+                    passwordError.textContent = 'Password must be at least 6 characters';
+                    passwordError.classList.add('show');
+                    return false;
+                } else {
+                    passwordInput.classList.remove('error');
+                    passwordError.classList.remove('show');
+                    return true;
+                }
+            }
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate all fields
+                const isUsernameValid = validateUsername();
+                const isPasswordValid = validatePassword();
+
+                if (isUsernameValid && isPasswordValid) {
+                    // Show success message
+                    successMessage.classList.add('show');
+                    
+                    // Simulate sign in process
+                    const button = form.querySelector('.signin-button');
+                    button.disabled = true;
+                    button.textContent = 'Signing in...';
+
+                    setTimeout(function() {
+                        console.log('Sign in successful!');
+                        console.log('Username:', usernameInput.value);
+                        
+                        // Reset form
+                        form.reset();
+                        button.disabled = false;
+                        button.textContent = 'Sign In';
+                        
+                        // Hide success message after 3 seconds
+                        setTimeout(function() {
+                            successMessage.classList.remove('show');
+                        }, 3000);
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
