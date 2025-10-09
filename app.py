@@ -6,6 +6,7 @@ Simple CLI application for managing subscriptions and greetings.
 import sys
 import json
 import os
+import re
 
 # File to store subscribers
 SUBSCRIBERS_FILE = "subscribers.json"
@@ -42,7 +43,6 @@ def handle_greeting(greeting_type):
 
 def is_valid_email(email):
     """Validate email format."""
-    import re
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
